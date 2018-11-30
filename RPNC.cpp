@@ -18,6 +18,9 @@ Postconditions: none
 
 #include <string> 
 #include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <string.h>
 
 using namespace std;
 
@@ -79,8 +82,7 @@ class Stack {
      }
 
      int pop(){
-         if (data.empty())    
-         {
+         if (data.empty()) {
             cout << "Error on pop: Stack is empty" << endl;
             return -99;
          } else {
@@ -98,6 +100,53 @@ class Stack {
          }
      }
 };
+//check if a given file opens
+bool doesFileOpen(ifstream &infile) {
+    if(infile.fail()) {
+        return false;
+    } else {
+        return true;
+    }
+};
 
 int main(int argc, char* argv[]){
+    /* * * * * * * * * * * * * FILE INPUT * * * * * * * * * * * * * * */
+    string filename;
+
+    //figure out if the file is an command line argument or a manual input, check it, and begin to run it
+    if (argc == 1) {
+        cout << "Please an input file: ";
+        cin >> filename;
+        ifstream infile(filename);  
+        if (doesFileOpen(infile) == true) { 
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+            cout << "File: " << filename << " opened sucessfully." << endl;
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+
+        } else {
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+            cout << "Error - couldn't process " << filename << endl;
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+
+            return 1;
+        }  
+    } else {
+        ifstream argfile(argv[1]); 
+        filename = argv[1];
+         if (doesFileOpen(argfile) == true) { 
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+            cout << "File: " << filename << " opened sucessfully." << endl;
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+
+        } else {
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+            cout << "Error - couldn't process " << filename << endl;
+            cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
+            return 1;
+        }
+    }
+
+    Stack rpn;
+    
+    return 0;
 }
