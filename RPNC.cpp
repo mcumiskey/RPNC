@@ -18,16 +18,19 @@ Postconditions: none
 
 #include <string> 
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
+#include <stdlib.h>
 #include <string.h>
+#include <vector>
+#include <cstdlib>
+
 
 using namespace std;
 
 //Linked list is the underlying data structure for my stack
 class Node {
     public:
-        int data;
+        string data;
         Node *next;
 };
 
@@ -43,23 +46,37 @@ class LinkedList {
         bool empty() {
             return (head == NULL);
         }
-        void push(int value) {
+
+        void push(string value) {
             Node *temp = new Node();
             temp->data = value;
             temp->next = head;
             head = temp;
         }
-        int pop(){
-            int temp = head->data;
+
+        string pop(){
+            string temp = head->data;
             Node *oldHead = head;
             head = head->next;
             delete oldHead;
             return temp;
         }
-        int peek() {
+
+        string peek() {
             if(!empty()){
                 return head->data;
-            } 
+            } else {
+                return "Error on peek.";
+            }
+        }
+         //dumps out the contents of a list
+        void display() {
+            Node *temp = new Node;
+            temp = head;
+            while(temp != NULL) {
+                cout << temp->data << "\n";
+                temp = temp->next;
+            }
         }
 };
 
@@ -67,37 +84,39 @@ class LinkedList {
 class Stack {
     private: 
      LinkedList data;
-     int s = 0;
 
      public:
+    int size = 0;
 
      bool empty() {
          return data.empty();
      }
 
-     void push(int value) {
+     void push(string value) {
          cout << "pushing " << value << endl;
          data.push(value);
-         s++;
+         size++;
      }
 
-     int pop(){
+     string pop(){
          if (data.empty()) {
-            cout << "Error on pop: Stack is empty" << endl;
-            return -99;
+            return "Error on pop: Stack is empty";
          } else {
-            s--;
+            size--;
             return data.pop();
          }       
      }
 
-     int peek() {
+     string peek() {
          if (empty()) {
-            cout << "Error on peek: Stack is empty" << endl;
-            return -99;
+            return "Error on peek: Stack is empty";
          } else {
             return data.peek();
          }
+     }
+
+     void display(){
+        data.display();
      }
 };
 //check if a given file opens
@@ -109,9 +128,19 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
+Stack Expressions_by_Line(ifstream &infile);
+Stack parseLines(Stack expressions);
+
+
 int main(int argc, char* argv[]){
+
     /* * * * * * * * * * * * * FILE INPUT * * * * * * * * * * * * * * */
     string filename;
+    ifstream infile;
+    Stack stackofExpressions;   //reads file line-by-line
+    Stack stackOfElements;       //parses the expressions into one stack, separated by endExp
+                                //this was done to successfully store the data in a way that kept expressioms 
+                                //seperate in an easy and visual way. 
 
     //figure out if the file is an command line argument or a manual input, check it, and begin to run it
     if (argc == 1) {
@@ -122,7 +151,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-
+            stackofExpressions = Expressions_by_Line(infile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -131,13 +160,13 @@ int main(int argc, char* argv[]){
             return 1;
         }  
     } else {
-        ifstream argfile(argv[1]); 
         filename = argv[1];
+        ifstream argfile(filename);  
          if (doesFileOpen(argfile) == true) { 
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-
+            stackofExpressions = Expressions_by_Line(argfile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -145,8 +174,52 @@ int main(int argc, char* argv[]){
             return 1;
         }
     }
+    /* * * * * * * * * * * * * * * PUSHING FROM LINE TO STACK * * * * * * * * * * * * * * * * */
+    stackofExpressions.display();
+    stackOfElements = parseLines(stackofExpressions);
+    stackOfElements.display();
 
-    Stack rpn;
-    
     return 0;
+}
+
+Stack Expressions_by_Line(ifstream &infile){
+    Stack stackofExpressions;
+    string newLine;
+    string endExp = "YOUSHALLNOTPASS"; //  the end of each expression is marked for evaluation 
+
+    while (!infile.eof()) {
+        getline(infile, newLine); 
+        stackofExpressions.push(newLine); //store line as one big string
+        stackofExpressions.push(endExp); //mark where an expression ends
+    }
+    return stackofExpressions;
+}
+
+Stack parseLines(Stack expressions) {
+    Stack inividualStack; // a stack of individual elements 
+    string curWord; //one element in a line of expressions 
+    string nonAphabetical = "0123456789+*-/"; //a string representation of non alphabetical characters 
+    while(!expressions.empty()){
+        string curLine = expressions.pop();
+        cout <<  curLine << " is the current line." << endl;
+        for(int j = 0; j < curLine.size(); j++){
+            if(curLine.at(j) == nonAphabetical){    //if the char is not " " or a letter
+                inividualStack.push(curLine.at(j)); //push single digit nonAlpha to the stack
+            }
+            if ((!(curLine.at(j+1) > curline.size())) //if j+1 is not out of bounds...
+                &&(curLine.at(j) == nonAphabetical) 
+                && (curLine.at(j+1) == nonAphabetical)){ // check for 2 digit numbers 
+                inividualStack.push(curLine.substr(j, j+1)); //if found, add two digits to the stack
+            }
+            if ((!(curLine.at(j+2) > curline.size())) //if j+2 is not out of bounds...
+                &&(curLine.at(j) == nonAphabetical) 
+                && (curLine.at(j+1) == nonAphabetical)
+                && (curLine.at(j+2) == nonAphabetical)){ // check for 3 digit numbers 
+                inividualStack.push(curLine.substr(j, j+2)); //if found, add three digits to the stack
+            } else {
+                inividualStack.push(curLine); //curline will be "YOU SHALL NOT PASS"
+            }
+        }   
+    }
+    return inividualStack;
 }
