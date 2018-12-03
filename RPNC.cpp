@@ -130,11 +130,10 @@ bool doesFileOpen(ifstream &infile) {
 
 
 
-Stack Expressions_by_Line(ifstream &infile);
+Stack Expressions_by_Line(ifstream &infile); //gets each line, adds a seperator
 bool isOperator(char ch); //checks to see if a character is an operator 
-
-Stack parseLines(Stack expressions);
-
+Stack parseLines(Stack needsPasrsing); //stores each char and the seperator 
+int performOperation(int op1, int op2, char op); //does math
 
 int main(int argc, char* argv[]){
 
@@ -179,7 +178,9 @@ int main(int argc, char* argv[]){
         }
     }
     /* * * * * * * * * * * * * * * PUSHING FROM LINE TO STACK * * * * * * * * * * * * * * * * */
-   
+    ParsedStack = parseLines(NeedsPasrsing);
+    ParsedStack.display();
+
 
     return 0;
 }
@@ -196,7 +197,7 @@ bool isOperator(char ch) {
 //performs the operatation of the expression
 int performOperation(int op1, int op2, char op){
     int answer; 
-    switch(op){ //switch case bc it has to be an operation 
+    switch(op){  //switch case bc there is a set amount of operations
         case '+': 
             answer = op2 + op1; //answer is equal to the two numbers added
             break;
@@ -228,8 +229,25 @@ Stack Expressions_by_Line(ifstream &infile){
     return stackofExpressions;
 }
 
-Stack parseLines(Stack expressions) {
-    Stack inividualStack; // a stack of individual elements 
-    
-    return inividualStack;
+Stack parseLines(Stack needsPasrsing) {
+  Stack parsedStack;
+  
+    while(!needsPasrsing.empty()){
+        string str = needsPasrsing.pop();
+
+        if(str == "seperate"){
+            parsedStack.push(str);
+        } else {
+            size_t found = str.find_first_of(" ");
+            size_t lastFound = 0;
+            
+            while ((str.size() > 0) && (!(lastFound == found))){
+                parsedStack.push(str.substr(lastFound, found));
+                str = str.substr(found+1, str.size() - 1);
+                lastFound = 0; 
+                found = str.find_first_of(" ");
+            }
+        }
+    }
+  return parsedStack;
 }
