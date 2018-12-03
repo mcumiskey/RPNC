@@ -128,7 +128,11 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
+
+
 Stack Expressions_by_Line(ifstream &infile);
+bool isOperator(char ch); //checks to see if a character is an operator 
+
 Stack parseLines(Stack expressions);
 
 
@@ -175,11 +179,40 @@ int main(int argc, char* argv[]){
         }
     }
     /* * * * * * * * * * * * * * * PUSHING FROM LINE TO STACK * * * * * * * * * * * * * * * * */
-    stackofExpressions.display();
-    stackOfElements = parseLines(stackofExpressions);
-    stackOfElements.display();
+   
 
     return 0;
+}
+
+
+bool isOperator(char ch) {
+    if (ch == '+' || ch == '-' || ch == '*' || ch == '/'){ //supported operators
+        return true; 
+    } else { 
+        return false; 
+    }
+}
+
+//performs the operatation of the expression
+int performOperation(int op1, int op2, char op){
+    int answer; 
+    switch(op){ //switch case bc it has to be an operation 
+        case '+': 
+            answer = op2 + op1; //answer is equal to the two numbers added
+            break;
+        case '-': 
+            answer = op2 - op1; // answer is equal to the two numbers subtracted
+            break;
+        case '*': 
+            answer = op2 * op1; //answer is equal to the two numbers multiplied
+            break;
+        case '/': //division operator
+            answer = op2 / op1; //answer is equal to the two numbers divided
+            break;
+        case '^':
+            answer = pow(op2, op1); //answer is equal to op2^op1
+    }
+    return answer; //returns the answer
 }
 
 Stack Expressions_by_Line(ifstream &infile){
@@ -197,29 +230,6 @@ Stack Expressions_by_Line(ifstream &infile){
 
 Stack parseLines(Stack expressions) {
     Stack inividualStack; // a stack of individual elements 
-    string curWord; //one element in a line of expressions 
-    string nonAphabetical = "0123456789+*-/"; //a string representation of non alphabetical characters 
-    while(!expressions.empty()){
-        string curLine = expressions.pop();
-        cout <<  curLine << " is the current line." << endl;
-        for(int j = 0; j < curLine.size(); j++){
-            if(curLine.at(j) == nonAphabetical){    //if the char is not " " or a letter
-                inividualStack.push(curLine.at(j)); //push single digit nonAlpha to the stack
-            }
-            if ((!(curLine.at(j+1) > curline.size())) //if j+1 is not out of bounds...
-                &&(curLine.at(j) == nonAphabetical) 
-                && (curLine.at(j+1) == nonAphabetical)){ // check for 2 digit numbers 
-                inividualStack.push(curLine.substr(j, j+1)); //if found, add two digits to the stack
-            }
-            if ((!(curLine.at(j+2) > curline.size())) //if j+2 is not out of bounds...
-                &&(curLine.at(j) == nonAphabetical) 
-                && (curLine.at(j+1) == nonAphabetical)
-                && (curLine.at(j+2) == nonAphabetical)){ // check for 3 digit numbers 
-                inividualStack.push(curLine.substr(j, j+2)); //if found, add three digits to the stack
-            } else {
-                inividualStack.push(curLine); //curline will be "YOU SHALL NOT PASS"
-            }
-        }   
-    }
+    
     return inividualStack;
 }
