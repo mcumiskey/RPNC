@@ -26,35 +26,35 @@ using namespace std;
 class Stack {
     public:
     int a[10];
-    int top;
+    int size;
 
     Stack() {
-        top = 0;
+        size = 0;
     }
     bool isEmpty(){
-        return top == 0;
+        return size == 0;
     }
     void push (int newElement) {
-        if (top == 10) {
+        if (size == 10) {
             cout << "Error: stack is full." << endl;
         } else {
-            a[++top] = newElement;
+            a[++size] = newElement;
         }
     }
 
     int pop () {
-        if (top == 0) {
+        if (size == 0) {
             cout << "Error: stack is empty." << endl;
             return NULL; //not good
         } else {
-            int returnElement = a[top];
-            --top;
+            int returnElement = a[size];
+            --size;
             return returnElement;
         }
     }
 
     int peek() {
-        return a[top];
+        return a[size];
     }
 };
 //check if a given file opens
@@ -128,8 +128,17 @@ void run(ifstream &infile){
             workStack.push(stoi(tempChar));
         } 
         if(isOperator(tempChar)) {
-        cout << "I'm an operator" << endl;
-        cout << evaluatePart(workStack.pop(), workStack.pop(), tempChar) << endl;
+            cout << "I'm an operator" << endl;
+
+            if((workStack.size != 2) || (workStack.isEmpty()){
+                cout << "RPNC ERROR Invalid Expression: ";
+                while(!workStack.isEmpty()){
+                    cout << workStack.pop() << " ";
+                }
+            } else {
+                cout << evaluatePart(workStack.pop(), workStack.pop(), tempChar) << endl;
+            }
+        }
         cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
         }
     }
