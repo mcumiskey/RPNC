@@ -23,7 +23,7 @@ Postconditions: none
 #include <string.h>
 #include <vector>
 #include <cstdlib>
-
+#include <cmath>
 
 using namespace std;
 
@@ -128,12 +128,10 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
+Stack Expressions_by_Line(ifstream &infile, string lineDivider); //gets each line, adds a seperator
 
-
-Stack Expressions_by_Line(ifstream &infile); //gets each line, adds a seperator
 bool isOperator(char ch); //checks to see if a character is an operator 
-Stack parseLines(Stack needsPasrsing); //stores each char and the seperator 
-int performOperation(int op1, int op2, char op); //does math
+int evaluatePart(int op1, int op2, char op); //does math on a specific part 
 
 int main(int argc, char* argv[]){
 
@@ -141,9 +139,11 @@ int main(int argc, char* argv[]){
     string filename;
     ifstream infile;
     Stack stackofExpressions;   //reads file line-by-line
-    Stack stackOfElements;       //parses the expressions into one stack, separated by endExp
+    Stack stackOfElements;       //parses the expressions into one stack, separated by lineDivider
                                 //this was done to successfully store the data in a way that kept expressioms 
                                 //seperate in an easy and visual way. 
+    string lineDivider = "YOUSHALLNOTPASS"; //  the end of each expression is marked for evaluation 
+
 
     //figure out if the file is an command line argument or a manual input, check it, and begin to run it
     if (argc == 1) {
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            stackofExpressions = Expressions_by_Line(infile);
+            stackofExpressions = Expressions_by_Line(infile, lineDivider);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -169,7 +169,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            stackofExpressions = Expressions_by_Line(argfile);
+            stackofExpressions = Expressions_by_Line(argfile, lineDivider);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -178,9 +178,7 @@ int main(int argc, char* argv[]){
         }
     }
     /* * * * * * * * * * * * * * * PUSHING FROM LINE TO STACK * * * * * * * * * * * * * * * * */
-    ParsedStack = parseLines(NeedsPasrsing);
-    ParsedStack.display();
-
+    stackOfElements.display();
 
     return 0;
 }
@@ -194,8 +192,8 @@ bool isOperator(char ch) {
     }
 }
 
-//performs the operatation of the expression
-int performOperation(int op1, int op2, char op){
+//look at two numbers and their operator, and return the given math bit
+int evaluatePart(int op1, int op2, char op){
     int answer; 
     switch(op){  //switch case bc there is a set amount of operations
         case '+': 
@@ -216,38 +214,14 @@ int performOperation(int op1, int op2, char op){
     return answer; //returns the answer
 }
 
-Stack Expressions_by_Line(ifstream &infile){
+Stack Expressions_by_Line(ifstream &infile, string lineDivider){
     Stack stackofExpressions;
     string newLine;
-    string endExp = "YOUSHALLNOTPASS"; //  the end of each expression is marked for evaluation 
 
     while (!infile.eof()) {
         getline(infile, newLine); 
         stackofExpressions.push(newLine); //store line as one big string
-        stackofExpressions.push(endExp); //mark where an expression ends
+        stackofExpressions.push(lineDivider); //mark where an expression ends
     }
     return stackofExpressions;
-}
-
-Stack parseLines(Stack needsPasrsing) {
-  Stack parsedStack;
-  
-    while(!needsPasrsing.empty()){
-        string str = needsPasrsing.pop();
-
-        if(str == "seperate"){
-            parsedStack.push(str);
-        } else {
-            size_t found = str.find_first_of(" ");
-            size_t lastFound = 0;
-            
-            while ((str.size() > 0) && (!(lastFound == found))){
-                parsedStack.push(str.substr(lastFound, found));
-                str = str.substr(found+1, str.size() - 1);
-                lastFound = 0; 
-                found = str.find_first_of(" ");
-            }
-        }
-    }
-  return parsedStack;
 }
