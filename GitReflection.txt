@@ -1,3 +1,0 @@
-**Markdown Summary for File Management and Version Control**
-
-Hello World!
