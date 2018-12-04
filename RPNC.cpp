@@ -19,8 +19,6 @@ Postconditions: none
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
-#include <string.h>
-#include <cstdlib>
 #include <cmath>
 
 using namespace std;
@@ -69,8 +67,9 @@ bool doesFileOpen(ifstream &infile) {
 };
 
 void run(ifstream &infile); //pops everything from the file streams and works math magic
-bool isOperator(char ch); //checks to see if a character is an operator 
-int evaluatePart(int op1, int op2, char op); //does math on a specific part 
+bool isOperator(string ch); //checks to see if a character is an operator 
+bool isNumber(string ch);
+int evaluatePart(int num1, int num2, string op); //does math on a specific part 
 
 int main(int argc, char* argv[]){
 
@@ -120,38 +119,56 @@ int main(int argc, char* argv[]){
 
 void run(ifstream &infile){
     Stack workStack;
-    
+    string tempChar;
     while (!infile.eof()) {
+        infile >> tempChar;
+        cout << tempChar << endl;
+        if(isNumber(tempChar)){
+            cout << "I'm a number" << endl;
+            workStack.push(stoi(tempChar));
+        } 
+        if(isOperator(tempChar)) {
+        cout << "I'm an operator" << endl;
+        cout << evaluatePart(workStack.pop(), workStack.pop(), tempChar) << endl;
+        cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+        }
     }
 }
 
 
-bool isOperator(char ch) {
-    if (ch == '+' || ch == '-' || ch == '*' || ch == '/'){ //supported operators
+bool isOperator(string ch) {
+    if (ch == "+" || ch == "-" || ch == "*" || ch == "/" || ch == "^"){ //supported operators
         return true; 
     } else { 
         return false; 
     }
 }
 
+bool isNumber(string ch){
+    string numbers = "0123456789";
+        return !ch.empty() && ch.find_first_not_of(numbers) == std::string::npos;
+}
+
 //look at two numbers and their operator, and return the given math bit
-int evaluatePart(int op1, int op2, char op){
+int evaluatePart(int num1, int num2, string op){
+    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+    cout << "Evaluating: " << num1 << " " << num2 << " " << op << endl;
+
     int answer; 
-    switch(op){  //switch case bc there is a set amount of operations
-        case '+': 
-            answer = op2 + op1; //answer is equal to the two numbers added
-            break;
-        case '-': 
-            answer = op2 - op1; // answer is equal to the two numbers subtracted
-            break;
-        case '*': 
-            answer = op2 * op1; //answer is equal to the two numbers multiplied
-            break;
-        case '/': //division operator
-            answer = op2 / op1; //answer is equal to the two numbers divided
-            break;
-        case '^':
-            answer = pow(op2, op1); //answer is equal to op2^op1
+    if(op == "+"){ 
+        answer = num2 + num1; //answer is equal to the two numbers added
+    } 
+    if(op == "-"){ 
+        answer = num2 - num1; // answer is equal to the two numbers subtracted
+    }
+    if(op == "*"){ 
+        answer = num2 * num1; //answer is equal to the two numbers multiplied
+    }
+    if(op == "/"){ 
+        answer = num2 / num1; //answer is equal to the two numbers divided
+    }
+    if(op == "^"){ 
+        answer = pow(num2, num1); //answer is equal to num2^num1
     }
     return answer; //returns the answer
 }
