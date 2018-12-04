@@ -5,7 +5,6 @@ Author: Miles Cumiskey
 Description: An RPN calculator that reads a series of expressions in RPN form from a file. 
 The user has two options: they can enter the filename as a command line argument or they may be prompted for a filename after launching the program. 
 In either case, the program halts if the file does not exist.
-
 Individual expressions in RPN format (see below) are read from the file. 
 If an expression is well-formed the program will evaluate it and display the expression along with its results on the console. 
 Malformed expressions result in an error message being displayed on the console.
@@ -21,7 +20,6 @@ Postconditions: none
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
-#include <vector>
 #include <cstdlib>
 #include <cmath>
 
@@ -135,15 +133,13 @@ int evaluatePart(int op1, int op2, char op); //does math on a specific part
 
 int main(int argc, char* argv[]){
 
-    /* * * * * * * * * * * * * FILE INPUT * * * * * * * * * * * * * * */
+    /* * * * * * * * * * * *  * * * * FILE INPUT * * * * * * * * * * * * * * * * * */
     string filename;
     ifstream infile;
-    Stack stackofExpressions;   //reads file line-by-line
-    Stack stackOfElements;       //parses the expressions into one stack, separated by lineDivider
-                                //this was done to successfully store the data in a way that kept expressioms 
-                                //seperate in an easy and visual way. 
-    string lineDivider = "YOUSHALLNOTPASS"; //  the end of each expression is marked for evaluation 
-
+    Stack NeedsPasrsing;   //reads file line-by-line
+    Stack ParsedStack;     //parses the expressions into one stack, separated by endExp
+                           //this was done to successfully store the data in a way that kept expressioms 
+                           //seperate in an easy and visual way. 
 
     //figure out if the file is an command line argument or a manual input, check it, and begin to run it
     if (argc == 1) {
@@ -154,7 +150,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            stackofExpressions = Expressions_by_Line(infile, lineDivider);
+            NeedsPasrsing = Expressions_by_Line(infile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -169,7 +165,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            stackofExpressions = Expressions_by_Line(argfile, lineDivider);
+            NeedsPasrsing = Expressions_by_Line(argfile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -177,8 +173,12 @@ int main(int argc, char* argv[]){
             return 1;
         }
     }
-    /* * * * * * * * * * * * * * * PUSHING FROM LINE TO STACK * * * * * * * * * * * * * * * * */
-    stackOfElements.display();
+    /* * * * * * * * * * * * * * * PUSHING FROM LINES TO INDIVIDUAL STACK * * * * * * * * * * * * * * * * */
+    ParsedStack = parseLines(NeedsPasrsing);
+    ParsedStack.display();
+
+    /* * * * * * * * * * * * * * * EVALUATE FROM NDIVIDUAL STACK * * * * * * * * * * * * * * * * */
+
 
     return 0;
 }
@@ -224,4 +224,28 @@ Stack Expressions_by_Line(ifstream &infile, string lineDivider){
         stackofExpressions.push(lineDivider); //mark where an expression ends
     }
     return stackofExpressions;
+}
+
+
+Stack parseLines(Stack needsPasrsing) {
+  Stack parsedStack;
+  
+    while(!needsPasrsing.empty()){
+        string str = needsPasrsing.pop();
+
+        if(str == "YOUSHALLNOTPASS"){ //brute force separation! 
+            parsedStack.push(str);
+        } else {
+            size_t found = str.find_first_of(" ");
+            size_t lastFound = 0;
+            
+            while ((str.size() > 0) && (!(lastFound == found))){
+                parsedStack.push(str.substr(lastFound, found));
+                str = str.substr(found+1, str.size() - 1);
+                lastFound = 0; 
+                found = str.find_first_of(" ");
+            }
+        }
+    }
+  return parsedStack;
 }
