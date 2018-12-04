@@ -69,7 +69,7 @@ bool doesFileOpen(ifstream &infile) {
 void run(ifstream &infile); //pops everything from the file streams and works math magic
 bool isOperator(string ch); //checks to see if a character is an operator 
 bool isNumber(string ch);
-int evaluatePart(int num1, int num2, string op); //does math on a specific part 
+void evaluate(int num1, int num2, string op); //does math on a specific part 
 
 int main(int argc, char* argv[]){
 
@@ -129,17 +129,17 @@ void run(ifstream &infile){
         } 
         if(isOperator(tempChar)) {
             // cout << "I'm an operator" << endl;
-
-            if(((workStack.size != 2) || (workStack.isEmpty()))){
+            if((workStack.size != 2)){
                 cout << "RPNC ERROR Invalid Expression: ";
                 while(!workStack.isEmpty()){
                     cout << workStack.pop() << " ";
                 }
+                cout << tempChar << endl;
             } else {
-                cout << evaluatePart(workStack.pop(), workStack.pop(), tempChar) << endl;
+                evaluate(workStack.pop(), workStack.pop(), tempChar);
             }
         }
-        cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+        //cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
         }
     }
 
@@ -158,8 +158,7 @@ bool isNumber(string ch){
 }
 
 //look at two numbers and their operator, and return the given math bit
-int evaluatePart(int num1, int num2, string op){
-    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+void evaluate(int num1, int num2, string op){
     cout << "Evaluating: " << num1 << " " << num2 << " " << op << endl;
 
     int answer; 
@@ -180,5 +179,4 @@ int evaluatePart(int num1, int num2, string op){
     }
     
     cout << num1 << " " << num2 << " " << op  << "          " << answer << endl;
-    return answer; //returns the answer
 }
