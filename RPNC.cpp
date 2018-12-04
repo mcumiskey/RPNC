@@ -25,97 +25,39 @@ Postconditions: none
 
 using namespace std;
 
-//Linked list is the underlying data structure for my stack
-class Node {
-    public:
-        string data;
-        Node *next;
-};
-
-class LinkedList {
-    private: 
-        Node *head;
-
-    public:
-        LinkedList() {
-            head = NULL;
-        }
-
-        bool empty() {
-            return (head == NULL);
-        }
-
-        void push(string value) {
-            Node *temp = new Node();
-            temp->data = value;
-            temp->next = head;
-            head = temp;
-        }
-
-        string pop(){
-            string temp = head->data;
-            Node *oldHead = head;
-            head = head->next;
-            delete oldHead;
-            return temp;
-        }
-
-        string peek() {
-            if(!empty()){
-                return head->data;
-            } else {
-                return "Error on peek.";
-            }
-        }
-         //dumps out the contents of a list
-        void display() {
-            Node *temp = new Node;
-            temp = head;
-            while(temp != NULL) {
-                cout << temp->data << "\n";
-                temp = temp->next;
-            }
-        }
-};
-
-//Basic Stack
 class Stack {
-    private: 
-     LinkedList data;
+    public:
+    int a[10];
+    int top;
 
-     public:
-    int size = 0;
+    Stack() {
+        top = 0;
+    }
+    bool isEmpty(){
+        return top == 0;
+    }
+    void push (int newElement) {
+        if (top == 10) {
+            cout << "Error: stack is full." << endl;
+        } else {
+            a[++top] = newElement;
+        }
+    }
 
-     bool empty() {
-         return data.empty();
-     }
+    int pop () {
+        if (top == 0) {
+            cout << "Error: stack is empty." << endl;
+            return NULL; //not good
+        } else {
+            int returnElement = a[top];
+            --top;
+            return returnElement;
+        }
+    }
 
-     void push(string value) {
-         cout << "pushing " << value << endl;
-         data.push(value);
-         size++;
-     }
-
-     string pop(){
-         if (data.empty()) {
-            return "Error on pop: Stack is empty";
-         } else {
-            size--;
-            return data.pop();
-         }       
-     }
-
-     string peek() {
-         if (empty()) {
-            return "Error on peek: Stack is empty";
-         } else {
-            return data.peek();
-         }
-     }
-
-     void display(){
-        data.display();
-     }
+    int peek() {
+        return a[top];
+    }
 };
 //check if a given file opens
 bool doesFileOpen(ifstream &infile) {
@@ -126,8 +68,7 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
-Stack Expressions_by_Line(ifstream &infile); //gets each line, adds a seperator
-Stack parseLines(Stack needsPasrsing); //parses each line and seperator into a new stack
+void run(ifstream &infile); //pops everything from the file streams and works math magic
 bool isOperator(char ch); //checks to see if a character is an operator 
 int evaluatePart(int op1, int op2, char op); //does math on a specific part 
 
@@ -136,12 +77,7 @@ int main(int argc, char* argv[]){
     /* * * * * * * * * * * *  * * * * FILE INPUT * * * * * * * * * * * * * * * * * */
     string filename;
     ifstream infile;
-    Stack NeedsPasrsing;   //reads file line-by-line
-    Stack ParsedStack;     //parses the expressions into one stack, separated by endExp
-                           //this was done to successfully store the data in a way that kept expressioms 
-                           //seperate in an easy and visual way. 
-
-    //figure out if the file is an command line argument or a manual input, check it, and begin to run it
+    
     if (argc == 1) {
         cout << "Please an input file: ";
         cin >> filename;
@@ -150,7 +86,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            NeedsPasrsing = Expressions_by_Line(infile);
+            run(infile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -165,7 +101,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "File: " << filename << " opened sucessfully." << endl;
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
-            NeedsPasrsing = Expressions_by_Line(argfile);
+            run(argfile);
         } else {
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             cout << "Error - couldn't process " << filename << endl;
@@ -174,13 +110,19 @@ int main(int argc, char* argv[]){
         }
     }
     /* * * * * * * * * * * * * * * PUSHING FROM LINES TO INDIVIDUAL STACK * * * * * * * * * * * * * * * * */
-    ParsedStack = parseLines(NeedsPasrsing);
-    ParsedStack.display();
+    
 
     /* * * * * * * * * * * * * * * EVALUATE FROM NDIVIDUAL STACK * * * * * * * * * * * * * * * * */
 
 
     return 0;
+}
+
+void run(ifstream &infile){
+    Stack workStack;
+    
+    while (!infile.eof()) {
+    }
 }
 
 
@@ -212,40 +154,4 @@ int evaluatePart(int op1, int op2, char op){
             answer = pow(op2, op1); //answer is equal to op2^op1
     }
     return answer; //returns the answer
-}
-
-Stack Expressions_by_Line(ifstream &infile){
-    Stack stackofExpressions;
-    string newLine;
-
-    while (!infile.eof()) {
-        getline(infile, newLine); 
-        stackofExpressions.push(newLine); //store line as one big string
-        stackofExpressions.push("YOUSHALLNOTPASS"); //mark where an expression ends
-    }
-    return stackofExpressions;
-}
-
-
-Stack parseLines(Stack needsPasrsing) {
-  Stack parsedStack;
-  
-    while(!needsPasrsing.empty()){
-        string str = needsPasrsing.pop();
-
-        if(str == "YOUSHALLNOTPASS"){ //brute force separation! this is pushed in Expressions_by_line
-            parsedStack.push(str);
-        } else {
-            size_t found = str.find_first_of(" ");
-            size_t lastFound = 0;
-            
-            while ((str.size() > 0) && (!(lastFound == found))){
-                parsedStack.push(str.substr(lastFound, found));
-                str = str.substr(found+1, str.size() - 1);
-                lastFound = 0; 
-                found = str.find_first_of(" ");
-            }
-        }
-    }
-  return parsedStack;
 }
