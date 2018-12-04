@@ -124,13 +124,13 @@ void run(ifstream &infile){
         infile >> tempChar;
         cout << tempChar << endl;
         if(isNumber(tempChar)){
-            cout << "I'm a number" << endl;
+            // cout << "I'm a number" << endl;
             workStack.push(stoi(tempChar));
         } 
         if(isOperator(tempChar)) {
-            cout << "I'm an operator" << endl;
+            // cout << "I'm an operator" << endl;
 
-            if((workStack.size != 2) || (workStack.isEmpty()){
+            if(((workStack.size != 2) || (workStack.isEmpty()))){
                 cout << "RPNC ERROR Invalid Expression: ";
                 while(!workStack.isEmpty()){
                     cout << workStack.pop() << " ";
@@ -142,7 +142,6 @@ void run(ifstream &infile){
         cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
         }
     }
-}
 
 
 bool isOperator(string ch) {
@@ -179,5 +178,7 @@ int evaluatePart(int num1, int num2, string op){
     if(op == "^"){ 
         answer = pow(num2, num1); //answer is equal to num2^num1
     }
+    
+    cout << num1 << " " << num2 << " " << op  << "          " << answer << endl;
     return answer; //returns the answer
 }
