@@ -126,8 +126,8 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
-Stack Expressions_by_Line(ifstream &infile, string lineDivider); //gets each line, adds a seperator
-
+Stack Expressions_by_Line(ifstream &infile); //gets each line, adds a seperator
+Stack parseLines(Stack needsPasrsing); //parses each line and seperator into a new stack
 bool isOperator(char ch); //checks to see if a character is an operator 
 int evaluatePart(int op1, int op2, char op); //does math on a specific part 
 
@@ -214,14 +214,14 @@ int evaluatePart(int op1, int op2, char op){
     return answer; //returns the answer
 }
 
-Stack Expressions_by_Line(ifstream &infile, string lineDivider){
+Stack Expressions_by_Line(ifstream &infile){
     Stack stackofExpressions;
     string newLine;
 
     while (!infile.eof()) {
         getline(infile, newLine); 
         stackofExpressions.push(newLine); //store line as one big string
-        stackofExpressions.push(lineDivider); //mark where an expression ends
+        stackofExpressions.push("YOUSHALLNOTPASS"); //mark where an expression ends
     }
     return stackofExpressions;
 }
@@ -233,7 +233,7 @@ Stack parseLines(Stack needsPasrsing) {
     while(!needsPasrsing.empty()){
         string str = needsPasrsing.pop();
 
-        if(str == "YOUSHALLNOTPASS"){ //brute force separation! 
+        if(str == "YOUSHALLNOTPASS"){ //brute force separation! this is pushed in Expressions_by_line
             parsedStack.push(str);
         } else {
             size_t found = str.find_first_of(" ");
