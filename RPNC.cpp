@@ -5,7 +5,7 @@ Author: Miles Cumiskey
 Description: An RPN calculator that reads a series of expressions in RPN form from a file. 
 The user has two options: they can enter the filename as a command line argument or they may be prompted for a filename after launching the program. 
 In either case, the program halts if the file does not exist.
-Individual expressions in RPN format (see below) are read from the file. 
+Individual expressions in RPN format are read from the file. 
 If an expression is well-formed the program will evaluate it and display the expression along with its results on the console. 
 Malformed expressions result in an error message being displayed on the console.
    
@@ -20,6 +20,7 @@ Postconditions: none
 #include <fstream>
 #include <stdlib.h>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 
@@ -45,7 +46,7 @@ class Stack {
     int pop () {
         if (size == 0) {
             cout << "Error: stack is empty." << endl;
-            return NULL; //not good
+            return -999; //not good
         } else {
             int returnElement = a[size];
             --size;
@@ -114,27 +115,36 @@ int main(int argc, char* argv[]){
 void run(ifstream &infile){
     Stack workStack;
     string tempChar;
+    vector <string> previousChar;
     while (!infile.eof()) {
         infile >> tempChar;
-        //cout << tempChar << endl;
+        string nextChar = infile.peek();    //look at the next character for evaluation 
         if(isNumber(tempChar)){
-            // cout << "I'm a number" << endl;
             workStack.push(stoi(tempChar));
         } 
         if(isOperator(tempChar)) {
-            // cout << "I'm an operator" << endl;
-            if((workStack.size != 2)){
+
+            if((workStack.size > 2)){       //if the stack is greater than 2, there are too many numbers for an operation
                 cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
                 cout << "RPNC ERROR Invalid Expression: ";
-                
-                while(!workStack.isEmpty()){
+                while(workStack.size != 0){
                     cout << workStack.pop() << " "; //output the failed numbers
                 }
                 cout << tempChar << endl; //output the operator too 
-            } else {
+            } if (isOperator(nextChar)){   //if the next character is also an operator (two in a row) its invalid 
+                cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+                cout << "RPNC ERROR Invalid Expression: ";
+                while(workStack.size != 0){
+                    cout << workStack.pop() << " "; //output the failed numbers
+                }
+                cout << tempChar << " " << nextChar << endl; //output the operator too 
+            }
+            
+            
+            else {    //the expression is valid
                 evaluate(workStack.pop(), workStack.pop(), tempChar);
             }
-        }
+        }        
     }
     cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
 }
@@ -161,20 +171,20 @@ void evaluate(int num2, int num1, string op){
 
     int answer; 
     if(op == "+"){ 
-        answer = num2 + num1; //answer is equal to the two numbers added
+        answer = num1 + num2; //answer is equal to the two numbers added
     } 
     if(op == "-"){ 
-        answer = num2 - num1; // answer is equal to the two numbers subtracted
+        answer = num1 - num2; // answer is equal to the two numbers subtracted
     }
     if(op == "*"){ 
-        answer = num2 * num1; //answer is equal to the two numbers multiplied
+        answer = num1 * num2; //answer is equal to the two numbers multiplied
     }
     if(op == "/"){ 
         answer = num2 / num1; //answer is equal to the two numbers divided
     }
     if(op == "^"){ 
-        answer = pow(num2, num1); //answer is equal to num2^num1
+        answer = pow(num1, num2); //answer is equal to num2^num1
     }
     
-    cout << num1 << " " << num2 << " " << op  << "         = " << answer << endl;
+    cout << num1 << " " << op << " " << num2  << "         = " << answer << endl;
 }
