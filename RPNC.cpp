@@ -67,13 +67,12 @@ bool doesFileOpen(ifstream &infile) {
 };
 
 void run(ifstream &infile); //pops everything from the file streams and works math magic
-bool isOperator(string ch); //checks to see if a character is an operator 
-bool isNumber(string ch);
-void evaluate(int num1, int num2, string op); //does math on a specific part 
+bool isOperator(string ch); //checks to see if a string is an operator 
+bool isNumber(string ch);   //checks to see if string is a number
+void evaluate(int num2, int num1, string op); //does math on a specific part 
 
 int main(int argc, char* argv[]){
 
-    /* * * * * * * * * * * *  * * * * FILE INPUT * * * * * * * * * * * * * * * * * */
     string filename;
     ifstream infile;
     
@@ -107,12 +106,7 @@ int main(int argc, char* argv[]){
             cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - " << endl;
             return 1;
         }
-    }
-    /* * * * * * * * * * * * * * * PUSHING FROM LINES TO INDIVIDUAL STACK * * * * * * * * * * * * * * * * */
-    
-
-    /* * * * * * * * * * * * * * * EVALUATE FROM NDIVIDUAL STACK * * * * * * * * * * * * * * * * */
-
+    }    
 
     return 0;
 }
@@ -122,7 +116,7 @@ void run(ifstream &infile){
     string tempChar;
     while (!infile.eof()) {
         infile >> tempChar;
-        cout << tempChar << endl;
+        //cout << tempChar << endl;
         if(isNumber(tempChar)){
             // cout << "I'm a number" << endl;
             workStack.push(stoi(tempChar));
@@ -130,18 +124,20 @@ void run(ifstream &infile){
         if(isOperator(tempChar)) {
             // cout << "I'm an operator" << endl;
             if((workStack.size != 2)){
+                cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
                 cout << "RPNC ERROR Invalid Expression: ";
+                
                 while(!workStack.isEmpty()){
-                    cout << workStack.pop() << " ";
+                    cout << workStack.pop() << " "; //output the failed numbers
                 }
-                cout << tempChar << endl;
+                cout << tempChar << endl; //output the operator too 
             } else {
                 evaluate(workStack.pop(), workStack.pop(), tempChar);
             }
         }
-        //cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
-        }
     }
+    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+}
 
 
 bool isOperator(string ch) {
@@ -158,7 +154,9 @@ bool isNumber(string ch){
 }
 
 //look at two numbers and their operator, and return the given math bit
-void evaluate(int num1, int num2, string op){
+// goes in num2 num1 because of stack
+void evaluate(int num2, int num1, string op){
+    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
     cout << "Evaluating: " << num1 << " " << num2 << " " << op << endl;
 
     int answer; 
@@ -178,5 +176,5 @@ void evaluate(int num1, int num2, string op){
         answer = pow(num2, num1); //answer is equal to num2^num1
     }
     
-    cout << num1 << " " << num2 << " " << op  << "          " << answer << endl;
+    cout << num1 << " " << num2 << " " << op  << "         = " << answer << endl;
 }
