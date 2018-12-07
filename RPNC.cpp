@@ -19,6 +19,8 @@ Postconditions: none
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <cmath>
 
 using namespace std;
@@ -27,6 +29,7 @@ class Stack {
     public:
     int a[10];
     int size;
+    int top;
 
     Stack() {
         size = 0;
@@ -38,7 +41,8 @@ class Stack {
         if (size == 10) {
             cout << "Error: stack is full." << endl;
         } else {
-            cout << "pushing: " << newElement << endl;
+            cout << "Pushing: " << newElement << endl;
+            top = newElement;
             a[++size] = newElement;
         }
     }
@@ -50,7 +54,7 @@ class Stack {
         } else {
             int returnElement = a[size];
             --size;
-            cout << "popping: " << returnElement << endl;
+            cout << "Popping: " << returnElement << endl;
             return returnElement;
         }
     }
@@ -68,13 +72,10 @@ bool doesFileOpen(ifstream &infile) {
     }
 };
 
-void run(ifstream &infile); //pops everything from the file stream line by line
-void parseLine(string currentLine); //looks at a line, uses a stack to store numbers, and evaluates what if it is valid
-bool isOperator(string ch); //checks to see if a string is an operator 
-bool isNumber(string ch);   //checks to see if string is a number
-bool isNumber(char ch);
-int  howManyDigits(string ch, int position); //checks to see if a number has multiple digits, and if it does, returns the digits (1, 2, or 3)
-int  evaluate(int num2, int num1, string op); //does math on a specific part 
+void run(ifstream &infile); //pops everything from the file streams and works math magic
+int parseLine(string line); //looks at the line provided by run and evaluates
+bool isOperator(char ch); //checks to see if a string is an operator 
+int evaluate(int num2, int num1, char op); //does math on a specific part 
 
 int main(int argc, char* argv[]){
 
@@ -117,7 +118,6 @@ int main(int argc, char* argv[]){
 }
 
 void run(ifstream &infile){
-    Stack workStack;
     string tempString;
     while (!infile.eof()) {
         getline(infile, tempString);
@@ -126,126 +126,78 @@ void run(ifstream &infile){
     cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
 }
 
+int parseLine(string line){
+    int length = line.size();
+    char exp[length];                 //array for expression
+    char buffer[length];              //char array for spaces
+    int i, num1, num2, j, space;      //variables for operations
+    Stack workStack;
 
-bool isOperator(string ch) {
-    if (ch == "+" || ch == "-" || ch == "*" || ch == "/" || ch == "^"){ //supported operators
+    strcpy(exp, line.c_str());       //copy string to char array to parse
+    
+    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
+    cout << "Evaluating: " << line << endl;
+    
+
+    //parses expression
+    j = 0;
+    //parses the expression and inserts them into the stack
+    for(i = 0; i < length; i++){
+        //checks how long the expression is
+        if(exp[i] >= '0' && exp[i] <= '9'){
+            buffer[j++] = exp[i];//inserts into array
+        }
+        else if(exp[i] == ' '){ //checks for spaces
+            if(j > 0){ //if j is greater than 0
+                buffer[j] = '\0'; // j is equal to '\0'
+                space = atoi(buffer); //x is equal to the space
+                workStack.push(space); //push into stack
+                j = 0; //j = 0;
+            }
+        }
+        
+        //performs the operation on the expression
+        else if(isOperator(exp[i])){
+            num1 = workStack.top; //num1 is equal to the top of stack
+            workStack.pop(); //removes the top of the stack
+            num2 = workStack.top; //num2 is equal to the top of stack
+            workStack.pop(); //removes the top of the stack
+            workStack.push(evaluate(num1, num2, exp[i])); //performs the operations of the expression
+        }
+    }
+    
+    //prints out the answer to the expression
+    cout << "Answer is " << workStack.top << endl;
+    return workStack.top; //returns the top
+}
+
+//check if something is an operator 
+bool isOperator(char ch) {
+    if (ch =='+' || ch =='-' || ch =='*' || ch =='/' || ch == '^'){ //supported operators
         return true; 
     } else { 
         return false; 
     }
 }
 
-bool isNumber(string ch){
-    string numbers = "0123456789";
-        return !ch.empty() && ch.find_first_not_of(numbers) == std::string::npos;
-}
 
-bool isNumber(char ch){
-    string numbers = "0123456789";
-    for(int i = 0; i < numbers.size(); i++){
-        if(ch == numbers.at(i)){
-            return true;
-        }
-    }
-    return false;
-}
-
-int  howManyDigits(string ch, int position){
-    int digits = 1;
-    int nextPos = position + 1;
-    int twoNext = position + 2;
-    int threeNext = position + 3;
-    string numbers = "0123456789";
-    if((nextPos != ch.size()) && (isNumber(ch.at(nextPos)))){ //if that char is a number
-            digits = 2;
-        if((twoNext != ch.size()) && (isNumber(ch.at(twoNext)))){ //if that char is a number
-            digits = 3;
-            if((threeNext != ch.size()) && (isNumber(ch.at(threeNext)))){ //if that char is a number
-                digits = 4;
-            }
-        }
-    }
-
-    return digits;
-}
-
-//function to evaluate the expression
-void parseLine(string curExpression){
-    Stack workStack;        //stores and sends data to be evaluated 
-    string curChar;
-    int answer;
-
-    cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
-    cout << "Evaluating: " << curExpression << endl;
-
-    for(int i = 0; i < curExpression.size(); i++) {             //while there are more chars in a line....
-        Stack lastAnswer;                                       //store the answers for the line, in case of multiple operatons 
-        cout << "curExpression is: " << curExpression << endl;
-        curChar = curExpression.at(i);
-
-        if(isNumber(curChar)){    
-            cout << "im number " << curChar << endl;             
-            if(howManyDigits(curExpression, i) > 1){       
-                workStack.push(stoi(curExpression.substr(i, i + howManyDigits(curExpression, i))));
-                curExpression.erase(i, i + howManyDigits(curExpression, i));           
-            } else {
-                workStack.push(stoi(curChar));                  //otherwise, just add 1-digit number to the stack
-                curExpression.erase(i);                
-            }
-        }
-        if(isOperator(curChar)) {
-            cout << "I'm an operator" << endl;
-            if(workStack.isEmpty()){                            //if there are no numbers, error 
-                cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
-                cout << "RPNC ERROR Invalid Expression: empty stack ";
-                cout << curChar << endl; //output the operator 
-            }
-            if((workStack.size == 1) && (lastAnswer.size == 1)){//if you have a number, an answer and an operator...
-                evaluate(lastAnswer.pop(), workStack.pop(), curChar);
-                lastAnswer.push(answer);
-            }
-            if (workStack.size == 1){
-                cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
-                cout << "RPNC ERROR Invalid Expression: not enough ";
-                cout << workStack.pop() << " " << curChar << endl; //output the operator 
-            }
-            if(workStack.size > 2){                            //if there is an operator and more than two operands, send error
-                cout << "+ + + + + + + + + + + + + + + + + + + + + + + + + + + " << endl;
-                cout << "RPNC ERROR Invalid Expression: numbers ";
-                while(!workStack.isEmpty()){
-                    cout << workStack.pop() << " "; //output the failed numbers
-                }
-                cout << curChar << endl; //output the operator too 
-            } 
-            else {
-                answer = evaluate(workStack.pop(), workStack.pop(), curChar);
-                lastAnswer.push(answer);
-            }
-        }
-    }
-}
 //look at two numbers and their operator, and return the given math bit
-// goes in num2 num1 because of stack weirdness
-int evaluate(int num2, int num1, string op) {
-    cout << "IM BEING EVALUATED" << endl;
-    cout << num1 << " " << num2 << " " << op << endl;
-
+int evaluate(int num2, int num1, char op){
     int answer; 
-    if(op == "+"){ 
+    if(op == '+'){ 
         answer = num2 + num1; //answer is equal to the two numbers added
     } 
-    if(op == "-"){ 
+    if(op == '-'){ 
         answer = num2 - num1; // answer is equal to the two numbers subtracted
     }
-    if(op == "*"){ 
+    if(op == '*'){ 
         answer = num2 * num1; //answer is equal to the two numbers multiplied
     }
-    if(op == "/"){ 
+    if(op == '/'){ 
         answer = num2 / num1; //answer is equal to the two numbers divided
     }
-    if(op == "^"){ 
+    if(op == '^'){ 
         answer = pow(num2, num1); //answer is equal to num2^num1
     }
-    
     return answer;
 }
